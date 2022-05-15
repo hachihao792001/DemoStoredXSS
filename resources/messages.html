@@ -60,7 +60,7 @@
         });
         //add click to all usernames
         for (var i = 0; i < usernames.length; i++) {
-            let index = i;  //tránh bị tất cả đều là cái cuối
+            let index = i;  // prevent every messageIndex from being the same (scope)
             usernames[i].addEventListener('click', (e) => {
                 window.location.href = "/viewUser/?messageindex=" + index.toString();
             });
@@ -83,13 +83,6 @@
         }
 
         function notifyNewMessageToServer(user, message) {
-            // var Ajax = null;
-            // Ajax = new XMLHttpRequest();
-            // Ajax.open("POST", '/newMessage', true);
-            // Ajax.setRequestHeader("Content-Type",
-            //     "application/x-www-form-urlencoded");
-            // Ajax.send("message=" + message + "&user=" + user.id);
-
             socket.emit('message', `{ "userId": ${user.id}, "username": "${user.username}", "message": "${message}" }`);
         }
 

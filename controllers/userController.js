@@ -12,7 +12,12 @@ exports.navigateToEditUser = (req, res) => {
         });
 
         fs.readFile("resources/editUser.html", function (err, html) {
+            // res.writeHead(200, {
+            //     "Content-Type": "text/html",
+            //     "Content-security-policy": "default-src 'self'",
+            // });
             res.writeHead(200, { "Content-Type": "text/html" });
+
             html = html.toString();
             html = html.replace("{{username}}", currentUser.username);
             html = html.replace("{{introduction}}", currentUser.introduction);
@@ -27,10 +32,19 @@ exports.editUser = (req, res) => {
         return res.end("You are not logged in");
     }
     userDAO.getUsers().then((users) => {
-        var userIndex = users.findIndex(function (user) {
+        var userIndex = users.findIndex((user) => {
             return user.id == req.session.loggedInUser.id;
         });
-        users[userIndex].introduction = req.body.introduction;
+
+        //escape introduction
+        var newIntroduction = req.body.introduction;
+        // newIntroduction = newIntroduction.replace(/&/g, "&amp;");
+        // newIntroduction = newIntroduction.replace(/</g, "&lt;");
+        // newIntroduction = newIntroduction.replace(/>/g, "&gt;");
+        // newIntroduction = newIntroduction.replace(/"/g, "&quot;");
+        // newIntroduction = newIntroduction.replace(/'/g, "&#039;");
+
+        users[userIndex].introduction = newIntroduction;
         req.session.loggedInUser = users[userIndex];
 
         userDAO.setUsers(users);
@@ -50,7 +64,12 @@ exports.navigateToViewUser = (req, res) => {
             });
 
             fs.readFile("resources/viewUser.html", function (err, html) {
+                // res.writeHead(200, {
+                //     "Content-Type": "text/html",
+                //     "Content-security-policy": "default-src 'self'",
+                // });
                 res.writeHead(200, { "Content-Type": "text/html" });
+
                 html = html.toString();
                 html = html.replace("{{username}}", currentUser.username);
                 html = html.replace(
