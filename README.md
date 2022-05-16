@@ -2,8 +2,6 @@
 
 This web application is only used for XSS demonstration, hence its modest appearance
 
-Login -> Edit user -> put the code below in the "Introduction", this will cause an alert to show up everytime a user visit your profile
-
 ## Usage
 
 Clone this project to your device and run these command in its root directory:
@@ -15,16 +13,20 @@ npm run dev
 
 Open a browser, access localhost:8080, you can log in from there. There are 5 available accounts: hao, thoi, dinh, john, bucky. All of them have the same password which is 123. You can edit or add account in [database/usersData.json](database/usersData.json), this project doesn't have a register account or change password feature simply because it isn't needed for its purpose (demonstrate XSS).
 
+After logged in, you can add new messages, edit your profile, or view other user's profile by clicking their name (where we will put the XSS stuff).
+
 ## XSS in action
 
-Login -> Edit user -> Put the code below in the "Introduction" textarea and press "Done". This will cause an alert to show up every time a user visits your profile. Of course, you can do more than just show a harmless alert, but it's what attackers do when they examine if a website is vulnerable to XSS.
+Login -> Edit user -> Put the code below in the "Introduction" textarea and press "Done". This will cause an alert to show up every time a user visits your profile. Of course, you can do more than just show a harmless alert, but it's what attackers do when they examine if a website is vulnerable to XSS.\
+You can also send this as a message to show the same alert everytime a user open the message page.
 
 ```html
 </textarea> <script>alert("hehe");</script>
 <!-- Put the </textarea> right before the malicious javascript to end the previous textarea tag. You can see it using the developer tool. -->
 ```
 
-This code below will cause an alert to show up every time a user visits your profile, but also copy its entire code to that user's "Introduction", making it a self-propagating worm
+This code below will cause an alert to show up every time a user visits your profile, but also copy its entire code to that user's "Introduction", making it a self-propagating worm.\
+I haven't figure out how to make this worm work with messages, you can try it out.
 
 ```html
 </textarea> 
@@ -54,17 +56,43 @@ This code below will cause an alert to show up every time a user visits your pro
 
 ## Prevention
 
-### Escape dynamic content
+### **Escape dynamic content**
 
-Go to [controllers/userController.js line 40](controllers/userController.js#L40) (the editUser PUT request), uncomment 5 comments below, this will escape every {&, <, >, ", '} to its entity encoding {&amp, &lt, &gt, &quot, &#039} in the received content. This way, every javascript in the received content become useless.
+Go to [controllers/userController.js line 40](controllers/userController.js#L40)  (the editUser PUT request):
 
-### Content Security Policy
+```javascript
+var newIntroduction = req.body.introduction;
+// newIntroduction = newIntroduction.replace(/&/g, "&amp;");
+// newIntroduction = newIntroduction.replace(/</g, "&lt;");
+// newIntroduction = newIntroduction.replace(/>/g, "&gt;");
+// newIntroduction = newIntroduction.replace(/"/g, "&quot;");
+// newIntroduction = newIntroduction.replace(/'/g, "&#039;");
+```
 
-Content Securiy Policy is the standard solution to many web security problem. It restrict what can be executed, performed in a web page so malicious codes have a harder time doing anything.
+Uncomment those 5 comments, this will escape every {&, <, >, ", '} to its entity encoding {&amp, &lt, &gt, &quot, &#039} in the received content. This way, every javascript in the received content become useless.
 
-Go to [controllers/userController.js line 15](controllers/userController.js#L15) and [line 67](controllers/userController.js#L67), uncomment each 4 lines, to set Content Securiy Policy to the HTTP Header before sending the response.
+### **Content Security Policy**
 
-Or you can go to [resources/editUser.html](resources/editUser.html) and [resources/viewUser.html](resources/viewUser.html), uncomment each one's meta tag and it will have the same effect as above.
+[Content Securiy Policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy) is the standard solution to many web security problem. It restrict what can be executed, performed in a web page so malicious codes have a harder time doing anything.
+
+Go to [controllers/userController.js line 17](controllers/userController.js#L17) and [line 68](controllers/userController.js#L68):
+
+```javascript
+res.writeHead(200, {
+    "Content-Type": "text/html",
+    //"Content-security-policy": "default-src 'self'",
+});
+```
+
+Uncomment that Content-securiy-policy line, to set Content Securiy Policy to the response's header before sending it away.
+
+Or you can go to [resources/editUser.html line 9](resources/editUser.html#L9) and [resources/viewUser.html line 9](resources/viewUser.html#L9):
+
+```html
+<!-- <meta http-equiv="Content-Security-Policy" content="default-src 'self'"> -->
+```
+
+Uncomment the meta tag and it will have the same effect as above.
 
 The CSP option that we saw is:
 
@@ -72,10 +100,8 @@ The CSP option that we saw is:
 Content-security-policy: default-src 'self'
 ```
 
-`default-src` means for every `src` directives that are absent, it will use this one's value instead.\
-`self` means that the web pages can only use resources which come from its own server.
-
-See more at <https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy>
+[`default-src`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/default-src) means for every `src` directives that are absent, it will use this one's value instead (the one that we need are [`script-src`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/script-src)).\
+[`self`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/Sources#sources) means that the web pages can only use resources which come from its own server.
 
 ## Reference
 

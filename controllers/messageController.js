@@ -34,7 +34,7 @@ exports.messageController = (req, res) => {
     });
 };
 
-addNewMessageToDB = (newMessageData) => {
+const addNewMessageToDB = (newMessageData) => {
     messageDAO.getMessages().then((messages) => {
         var userId = newMessageData.userId;
         var newMessage = newMessageData.message;
@@ -62,6 +62,6 @@ exports.initMessageNotifySocket = (server) => {
         });
 
         // Runs when client disconnects
-        socket.on("disconnect", () => {});
+        socket.on("disconnect", () => { });
     });
 };

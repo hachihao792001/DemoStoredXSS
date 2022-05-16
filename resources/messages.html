@@ -69,7 +69,14 @@
         function checkEmptyAndNotifyNewMessageToServer() {
             var message = messageInput.value;
             if (message != "") {
-                notifyNewMessageToServer(loggedInUser, message);
+
+                socket.emit('message', JSON.stringify(
+                    {
+                        userId: loggedInUser.id,
+                        username: loggedInUser.username,
+                        message: message
+                    }));
+
                 messageInput.value = "";
             }
         }
@@ -80,10 +87,6 @@
             var newMessage = document.createElement('tr');
             newMessage.innerHTML = '<td>' + username + ':</td><td>' + message + '</td>';
             allMessages.appendChild(newMessage);
-        }
-
-        function notifyNewMessageToServer(user, message) {
-            socket.emit('message', `{ "userId": ${user.id}, "username": "${user.username}", "message": "${message}" }`);
         }
 
         const socket = io();

@@ -12,11 +12,10 @@ exports.navigateToEditUser = (req, res) => {
         });
 
         fs.readFile("resources/editUser.html", function (err, html) {
-            // res.writeHead(200, {
-            //     "Content-Type": "text/html",
-            //     "Content-security-policy": "default-src 'self'",
-            // });
-            res.writeHead(200, { "Content-Type": "text/html" });
+            res.writeHead(200, {
+                "Content-Type": "text/html",
+                //"Content-security-policy": "default-src 'self'",
+            });
 
             html = html.toString();
             html = html.replace("{{username}}", currentUser.username);
@@ -64,11 +63,10 @@ exports.navigateToViewUser = (req, res) => {
             });
 
             fs.readFile("resources/viewUser.html", function (err, html) {
-                // res.writeHead(200, {
-                //     "Content-Type": "text/html",
-                //     "Content-security-policy": "default-src 'self'",
-                // });
-                res.writeHead(200, { "Content-Type": "text/html" });
+                res.writeHead(200, {
+                    "Content-Type": "text/html",
+                    //"Content-security-policy": "default-src 'self'",
+                });
 
                 html = html.toString();
                 html = html.replace("{{username}}", currentUser.username);
